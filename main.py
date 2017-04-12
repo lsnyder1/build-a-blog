@@ -20,7 +20,13 @@ import jinja2
 from google.appengine.ext import db
 
 template_dir = os.path.join(os.path.dirname(__file__), "templates")
-jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir))
+jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir),
+                                autoescape=True)
+
+class Blog(db.Model):
+    title=db.StringProperty(required=True)
+    created=db.DateTimeProperty(auto_now_add=True)
+    content=db.TextProperty(required=True)                               
 
 class Handler(webapp2.RequestHandler):
     def renderError(self, error_code):
