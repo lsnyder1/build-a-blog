@@ -36,7 +36,9 @@ class Handler(webapp2.RequestHandler):
         self.error(error_code)
         self.response.write("Oops! Something went wrong.")
 
-
+class BlogRedir(Handler):
+    def get(self):
+        self.redirect("/blog")
 
 class MainPage(Handler):
     def get(self):
@@ -50,15 +52,13 @@ class MainPage(Handler):
 
 
 class NewPost(Handler):
-    def get(self):
-
+    def get(self,title="",content="",error=""):
+        
         t= jinja_env.get_template("newpost.html")
-        cont=t.render(title=self.request.get("title"),
-                      content=self.request.get("content"),
-                      error=self.request.get("error"))
+        cont=t.render(title=title,error=error,content=content)
         self.response.write(cont)
 
-    def post(self):
+    def post(self,title="",content="",error=""):
         title=self.request.get("title")
         content=self.request.get("content")
 
@@ -67,14 +67,18 @@ class NewPost(Handler):
             a=Blog(title=title,content=content)
             a.put()
 
-            self.redirect("/")
+            self.redirect("/blog")
 
         else:
-
+            title=self.request.get("title")
+            content=self.request.get("content")
             error="Enter a title and content."
-            self.redirect("/newpost?error="+error)
+            t= jinja_env.get_template("newpost.html")
+            cont=t.render(title=title,error=error,content=content)
+            self.response.write(cont)
 
 app = webapp2.WSGIApplication([
-    ('/', MainPage),
+    ('/', BlogRedir),
+    ('/blog', MainPage),
     ('/newpost', NewPost)
 ], debug=True)
