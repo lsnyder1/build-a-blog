@@ -53,7 +53,7 @@ class MainPage(Handler):
 
 class NewPost(Handler):
     def get(self,title="",content="",error=""):
-        
+
         t= jinja_env.get_template("newpost.html")
         cont=t.render(title=title,error=error,content=content)
         self.response.write(cont)
@@ -66,8 +66,8 @@ class NewPost(Handler):
         if title and content:
             a=Blog(title=title,content=content)
             a.put()
-
-            self.redirect("/blog")
+            pst=str(a.key().id())
+            self.redirect("/blog/"+pst)
 
         else:
             title=self.request.get("title")
@@ -77,7 +77,20 @@ class NewPost(Handler):
             cont=t.render(title=title,error=error,content=content)
             self.response.write(cont)
 
+class ViewPostHandler(Handler):
+    def get(self,id):
+        #blogs=db.GqlQuery("Select * FROM Blog)
+        if Blog.get_by_id(int(id))==None:
+            self.response.write("There is no entry with that id.")
+        else:
+            id=int(id)
+            blog=Blog.get_by_id(id)
+            t= jinja_env.get_template("dyntmp.html")
+            cont=t.render(blog=blog)
+            self.response.write(cont)
+
 app = webapp2.WSGIApplication([
+    webapp2.Route('/blog/<id:\d+>', ViewPostHandler),
     ('/', BlogRedir),
     ('/blog', MainPage),
     ('/newpost', NewPost)
